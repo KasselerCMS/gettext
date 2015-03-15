@@ -683,7 +683,7 @@ if(!function_exists('gettext')){
      *
      * @return string
      */
-    function dcnpgettext($domain, $context, $singular, $plural, $number, $category) {
-        return _dcnpgettext($domain, $context, $singular, $plural, $number, $category);
+    function dcnpgettext($domain, $context, $singular, $plural, $category) {
+        return _dcnpgettext($domain, $context, $singular, $plural, $category);
     }
 }
