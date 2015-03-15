@@ -98,5 +98,4 @@ class FileReader {
     {
         return fclose($this->_fd);
     }
-
-};
+}

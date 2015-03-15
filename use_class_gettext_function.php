@@ -518,9 +518,11 @@ if(!function_exists('gettext')){
     /**
      * @param $domain
      * @param $path
+     *
+     * @return mixed
      */
     function bindtextdomain($domain, $path) {
-        return _bindtextdomain($domain, $path);
+        return call_user_func_array('_bindtextdomain', func_get_args());
     }
 
     /**
@@ -530,7 +532,7 @@ if(!function_exists('gettext')){
      * @return mixed
      */
     function bind_textdomain_codeset($domain, $codeSet) {
-        return _bind_textdomain_codeset($domain, $codeSet);
+        return call_user_func_array('_bind_textdomain_codeset', func_get_args());
     }
 
     /**
@@ -539,7 +541,7 @@ if(!function_exists('gettext')){
      * @return mixed
      */
     function textdomain($domain) {
-        return _textdomain($domain);
+        return call_user_func_array('_textdomain', func_get_args());
     }
 
     /**
@@ -548,7 +550,7 @@ if(!function_exists('gettext')){
      * @return string
      */
     function gettext($msgid) {
-        return _gettext($msgid);
+        return call_user_func_array('_gettext', func_get_args());
     }
 
     /**
@@ -557,7 +559,7 @@ if(!function_exists('gettext')){
      * @return string
      */
     function _($msgid) {
-        return _gettext($msgid);
+        return call_user_func_array('_gettext', func_get_args());
     }
 
     /**
@@ -568,7 +570,7 @@ if(!function_exists('gettext')){
      * @return string
      */
     function ngettext($singular, $plural, $number) {
-        return _ngettext($singular, $plural, $number);
+        return call_user_func_array('_ngettext', func_get_args());
     }
 
     /**
@@ -578,7 +580,7 @@ if(!function_exists('gettext')){
      * @return string
      */
     function dgettext($domain, $msgid) {
-        return _dgettext($domain, $msgid);
+        return call_user_func_array('_dgettext', func_get_args());
     }
 
     /**
@@ -590,7 +592,7 @@ if(!function_exists('gettext')){
      * @return string
      */
     function dngettext($domain, $singular, $plural, $number) {
-        return _dngettext($domain, $singular, $plural, $number);
+        return call_user_func_array('_dngettext', func_get_args());
     }
 
     /**
@@ -601,7 +603,7 @@ if(!function_exists('gettext')){
      * @return string
      */
     function dcgettext($domain, $msgid, $category) {
-        return _dcgettext($domain, $msgid, $category);
+        return call_user_func_array('_dcgettext', func_get_args());
     }
 
     /**
@@ -614,7 +616,7 @@ if(!function_exists('gettext')){
      * @return string
      */
     function dcngettext($domain, $singular, $plural, $number, $category) {
-        return _dcngettext($domain, $singular, $plural, $number, $category);
+        return call_user_func_array('_dcngettext', func_get_args());
     }
 
     /**
@@ -624,7 +626,7 @@ if(!function_exists('gettext')){
      * @return string
      */
     function pgettext($context, $msgid) {
-        return _pgettext($context, $msgid);
+        return call_user_func_array('_pgettext', func_get_args());
     }
 
     /**
@@ -636,7 +638,7 @@ if(!function_exists('gettext')){
      * @return string
      */
     function npgettext($context, $singular, $plural, $number) {
-        return _npgettext($context, $singular, $plural, $number);
+        return call_user_func_array('_npgettext', func_get_args());
     }
 
     /**
@@ -647,7 +649,7 @@ if(!function_exists('gettext')){
      * @return string
      */
     function dpgettext($domain, $context, $msgid) {
-        return _dpgettext($domain, $context, $msgid);
+        return call_user_func_array('_dpgettext', func_get_args());
     }
 
     /**
@@ -660,7 +662,7 @@ if(!function_exists('gettext')){
      * @return string
      */
     function dnpgettext($domain, $context, $singular, $plural, $number) {
-        return _dnpgettext($domain, $context, $singular, $plural, $number);
+        return call_user_func_array('_dnpgettext', func_get_args());
     }
 
     /**
@@ -672,7 +674,7 @@ if(!function_exists('gettext')){
      * @return string
      */
     function dcpgettext($domain, $context, $msgid, $category) {
-        return _dcpgettext($domain, $context, $msgid, $category);
+        return call_user_func_array('_dcpgettext', func_get_args());
     }
 
     /**
@@ -686,6 +688,6 @@ if(!function_exists('gettext')){
      * @return string
      */
     function dcnpgettext($domain, $context, $singular, $plural, $number, $category) {
-        return _dcnpgettext($domain, $context, $singular, $plural, $number, $category);
+        return call_user_func_array('_dcnpgettext', func_get_args());
     }
 }

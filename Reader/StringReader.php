@@ -73,5 +73,4 @@ class StringReader {
     {
         return strlen($this->_str);
     }
-
-};
+}

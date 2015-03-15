@@ -24,16 +24,29 @@ Well, this is a solution to your needs. It allows using gettext tools for managi
 PHP-gettext is a simple reader for GNU gettext MO files. Those are binary containers for translations, produced by GNU msgfmt.
 
 #### Usage
-You must use the initialization function:
-```php
-//                    filename   locale   charset
-init_translate_domain('message', 'fr',    'UTF-8',  'path_to_locales_dir');
-
-echo _gettext('Add');
-echo _ngettext('Minute', 'Minutes', 2);
-```
 
 To force the use of the class, you must install define:
 ```php
 define('GETTEXT_CLASS', true);
 ```
+
+You must use the initialization function:
+```php
+//                    filename   locale   charset
+init_translate_domain('message', 'fr',    'UTF-8',  'path_to_locales_dir');
+```
+
+***Native*** 
+
+```php
+echo gettext('Add');
+echo ngettext('Minute', 'Minutes', 2);
+```
+
+***Usage class***
+
+```php
+echo _gettext('Add');
+echo _ngettext('Minute', 'Minutes', 2);
+```
+
