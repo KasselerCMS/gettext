@@ -127,8 +127,6 @@ class GetTextReader {
     {
         if (is_int($FileReader->error)) {
             $this->short_circuit = true;
-
-            return false;
         }
 
         // Caching can be turned off
@@ -145,16 +143,12 @@ class GetTextReader {
             $this->BYTEORDER = 0;
         } else {
             $this->error = 1; // not MO file
-
-            return false;
         }
 
         $this->revision = $this->readInt();
         $this->total = $this->readInt();
         $this->originals = $this->readInt();
         $this->translations = $this->readInt();
-
-        return true;
     }
 
     /**

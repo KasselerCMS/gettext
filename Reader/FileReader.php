@@ -37,8 +37,6 @@ class FileReader {
         } else {
             $this->error = 2; // File doesn't exist
         }
-
-        return $this->error > 0 ? false : true;
     }
 
     /**
