@@ -678,7 +678,6 @@ if(!function_exists('gettext')){
      * @param $context
      * @param $singular
      * @param $plural
-     * @param $number
      * @param $category
      *
      * @return string
