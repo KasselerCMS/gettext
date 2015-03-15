@@ -1,6 +1,6 @@
 {
   "name": "kasseler/gettext",
-  "description": "Kasseler gettext package ",
+  "description": "Gettext library",
   "keywords": ["gettext", "locale", "mo reader"],
   "type": "library",
   "version": "1.0.0",
