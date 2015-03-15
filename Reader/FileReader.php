@@ -14,7 +14,7 @@ class FileReader {
     protected $_fd;
 
     /**
-     * @var string
+     * @var int
      */
     protected $_length;
 
@@ -32,7 +32,7 @@ class FileReader {
             $this->_length = filesize($filename);
             $this->_pos = 0;
             $this->_fd = fopen($filename, 'rb');
-            $this->error = $this->_fd ?: 3; // Cannot read file, probably permissions
+            $this->error = $this->_fd ? null : 3; // Cannot read file, probably permissions
 
         } else {
             $this->error = 2; // File doesn't exist

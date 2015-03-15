@@ -37,18 +37,8 @@
 // while the other constants are already available from session extension.
 use Kasseler\Component\GetText\Domain;
 use Kasseler\Component\GetText\GetTextReader;
+use Kasseler\Component\GetText\GetTextVars;
 use Kasseler\Component\GetText\Reader\FileReader;
-
-// Variables
-
-global $text_domains, $default_domain, $LC_CATEGORIES, $emulate, $currentLocale;
-$text_domains = array();
-$default_domain = 'messages';
-$LC_CATEGORIES = array('LC_CTYPE', 'LC_NUMERIC', 'LC_TIME', 'LC_COLLATE', 'LC_MONETARY', 'LC_MESSAGES', 'LC_ALL');
-$emulate = 0;
-$currentLocale = '';
-
-// Utility functions
 
 /**
  * Return a list of locales to try for any POSIX-style locale specification.
@@ -67,35 +57,35 @@ function get_list_of_locales($locale) {
     $country = null;
     $charset = null;
     $modifier = null;
-    if($locale){
-        if(preg_match('/^(?P<lang>[a-z]{2,3})'       // language code
+    if($locale) {
+        if (preg_match('/^(?P<lang>[a-z]{2,3})'       // language code
             .'(?:_(?P<country>[A-Z]{2}))?'           // country code
             .'(?:\.(?P<charset>[-A-Za-z0-9_]+))?'    // charset
             .'(?:@(?P<modifier>[-A-Za-z0-9_]+))?$/', // @ modifier
-            $locale, $matches)){
+            $locale, $matches)) {
 
             isset($matches["lang"])     && $lang = $matches["lang"];
             isset($matches["country"])  && $country = $matches["country"];
             isset($matches["charset"])  && $charset = $matches["charset"];
             isset($matches["modifier"]) && $modifier = $matches["modifier"];
 
-            if ($modifier) {
-                if ($country) {
-                    if ($charset) {
+            if ($modifier !== null) {
+                if ($country !== null) {
+                    if ($charset !== null) {
                         array_push($locale_names, "${lang}_$country.$charset@$modifier");
                     }
                     array_push($locale_names, "${lang}_$country@$modifier");
-                } elseif($charset) {
+                } elseif($charset !== null) {
                     array_push($locale_names, "${lang}.$charset@$modifier");
                 }
                 array_push($locale_names, "$lang@$modifier");
             }
-            if ($country) {
-                if ($charset) {
+            if ($country !== null) {
+                if ($charset !== null) {
                     array_push($locale_names, "${lang}_$country.$charset");
                 }
                 array_push($locale_names, "${lang}_$country");
-            } elseif($charset) {
+            } elseif($charset !== null) {
                 array_push($locale_names, "${lang}.$charset");
             }
             array_push($locale_names, $lang);
@@ -117,17 +107,16 @@ function get_list_of_locales($locale) {
  *
  * @return GetTextReader
  */
-function _get_reader($domain = null, $category = 5, $enable_cache = true){
-    global $text_domains, $default_domain, $LC_CATEGORIES;
-    !isset($domain) && $domain = $default_domain;
+function _get_reader($domain = null, $category = 5, $enable_cache = true) {
+    !isset($domain) && $domain = GetTextVars::$default_domain;
 
-    if (!isset($text_domains[$domain]->l10n)) {
+    if (!isset(GetTextVars::$text_domains[$domain]->l10n)) {
         // get the current locale
         $locale = _setlocale(LC_MESSAGES, 0);
-        $bound_path = isset($text_domains[$domain]->path)
-            ? $text_domains[$domain]->path
+        $bound_path = isset(GetTextVars::$text_domains[$domain]->path)
+            ? GetTextVars::$text_domains[$domain]->path
             : './';
-        $subpath = $LC_CATEGORIES[$category]."/$domain.mo";
+        $subpath = GetTextVars::$LC_CATEGORIES[$category]."/$domain.mo";
 
         $locale_names = get_list_of_locales($locale);
 
@@ -140,23 +129,23 @@ function _get_reader($domain = null, $category = 5, $enable_cache = true){
             }
         }
 
-        if (!array_key_exists($domain, $text_domains)) {
+        if (!array_key_exists($domain, GetTextVars::$text_domains)) {
             // Initialize an empty domain object.
-            $text_domains[$domain] = new Domain();
+            GetTextVars::$text_domains[$domain] = new Domain();
         }
-        $text_domains[$domain]->l10n = new GetTextReader($input, $enable_cache);
+        if ($input !== null) {
+            GetTextVars::$text_domains[$domain]->l10n = new GetTextReader($input, $enable_cache);
+        }
     }
 
-    return $text_domains[$domain]->l10n;
+    return GetTextVars::$text_domains[$domain]->l10n;
 }
 
 /**
  * Returns whether we are using our emulated gettext API or PHP built-in one.
  */
-function locale_emulation(){
-    global $emulate;
-
-    return $emulate;
+function locale_emulation() {
+    return GetTextVars::$emulate;
 }
 
 /**
@@ -166,12 +155,10 @@ function locale_emulation(){
  *
  * @return bool
  */
-function _check_locale_and_function($function = false){
-    global $emulate;
-
+function _check_locale_and_function($function = false) {
     return $function && !function_exists($function)
         ? false
-        : !$emulate;
+        : !GetTextVars::$emulate;
 }
 
 /**
@@ -181,14 +168,13 @@ function _check_locale_and_function($function = false){
  *
  * @return string
  */
-function _get_codeSet($domain = null){
-    global $text_domains, $default_domain;
+function _get_codeSet($domain = null) {
     if (!isset($domain)) {
-        $domain = $default_domain;
+        $domain = GetTextVars::$default_domain;
     }
 
-    return (isset($text_domains[$domain]->codeSet))
-        ? $text_domains[$domain]->codeSet
+    return (isset(GetTextVars::$text_domains[$domain]->codeSet))
+        ? GetTextVars::$text_domains[$domain]->codeSet
         : ini_get('mbstring.internal_encoding');
 }
 
@@ -199,7 +185,7 @@ function _get_codeSet($domain = null){
  *
  * @return string
  */
-function _encode($text){
+function _encode($text) {
     $source_encoding = mb_detect_encoding($text);
     $target_encoding = _get_codeSet();
 
@@ -215,7 +201,7 @@ function _encode($text){
  *
  * @return string
  */
-function _get_default_locale($locale){
+function _get_default_locale($locale) {
     return $locale == ''
         ? getenv('LANG')
         : $locale;
@@ -229,34 +215,33 @@ function _get_default_locale($locale){
  *
  * @return string
  */
-function _setlocale($category, $locale){
-    global $currentLocale, $emulate, $text_domains, $default_domain;
-    if ($locale === 0){ // use === to differentiate between string "0"
-        return $currentLocale != ''
-            ? $currentLocale
-            : _setlocale($category, $currentLocale);
+function _setlocale($category, $locale) {
+    if ($locale === 0) { // use === to differentiate between string "0"
+        return GetTextVars::$currentLocale != ''
+            ? GetTextVars::$currentLocale
+            : _setlocale($category, GetTextVars::$currentLocale);
     } else {
         if (function_exists('setlocale')) {
             $ret = setlocale($category, $locale);
             if (($locale == '' && !$ret) || ($locale != '' && $ret != $locale)) {
                 // Failed setting it according to environment.
-                $currentLocale = _get_default_locale($locale);
-                $emulate = 1;
+                GetTextVars::$currentLocale = _get_default_locale($locale);
+                GetTextVars::$emulate = 1;
             } else {
-                $currentLocale = $ret;
-                $emulate = 0;
+                GetTextVars::$currentLocale = $ret;
+                GetTextVars::$emulate = 0;
             }
         } else {
             // No function setlocale(), emulate it all.
-            $currentLocale = _get_default_locale($locale);
-            $emulate = 1;
+            GetTextVars::$currentLocale = _get_default_locale($locale);
+            GetTextVars::$emulate = 1;
         }
         // Allow locale to be changed on the go for one translation domain.
-        if(array_key_exists($default_domain, $text_domains)){
-            unset($text_domains[$default_domain]->l10n);
+        if (array_key_exists(GetTextVars::$default_domain, GetTextVars::$text_domains)) {
+            unset(GetTextVars::$text_domains[GetTextVars::$default_domain]->l10n);
         }
 
-        return $currentLocale;
+        return GetTextVars::$currentLocale;
     }
 }
 
@@ -266,8 +251,7 @@ function _setlocale($category, $locale){
  * @param $domain
  * @param $path
  */
-function _bindtextdomain($domain, $path){
-    global $text_domains;
+function _bindtextdomain($domain, $path) {
     // ensure $path ends with a slash ('/' should work for both, but lets still play nice)
     if (substr(php_uname(), 0, 7) == "Windows") {
         if ($path[strlen($path)-1] != '\\' && $path[strlen($path)-1] != '/') {
@@ -278,11 +262,11 @@ function _bindtextdomain($domain, $path){
             $path .= '/';
         }
     }
-    if(!array_key_exists($domain, $text_domains)){
+    if (!array_key_exists($domain, GetTextVars::$text_domains)) {
         // Initialize an empty domain object.
-        $text_domains[$domain] = new Domain();
+        GetTextVars::$text_domains[$domain] = new Domain();
     }
-    $text_domains[$domain]->path = $path;
+    GetTextVars::$text_domains[$domain]->path = $path;
 
     return $domain;
 }
@@ -293,9 +277,8 @@ function _bindtextdomain($domain, $path){
  * @param $domain
  * @param $codeSet
  */
-function _bind_textdomain_codeset($domain, $codeSet){
-    global $text_domains;
-    $text_domains[$domain]->codeSet = $codeSet;
+function _bind_textdomain_codeset($domain, $codeSet) {
+    GetTextVars::$text_domains[$domain]->codeSet = $codeSet;
 
     return $domain;
 }
@@ -305,9 +288,8 @@ function _bind_textdomain_codeset($domain, $codeSet){
  *
  * @param $domain
  */
-function _textdomain($domain){
-    global $default_domain;
-    $default_domain = $domain;
+function _textdomain($domain) {
+    GetTextVars::$default_domain = $domain;
 
     return $domain;
 }
@@ -319,7 +301,7 @@ function _textdomain($domain){
  *
  * @return string
  */
-function _gettext($msgid){
+function _gettext($msgid) {
     $l10n = _get_reader();
 
     return _encode($l10n->translate($msgid));
@@ -334,7 +316,7 @@ function _gettext($msgid){
  *
  * @return string
  */
-function _ngettext($singular, $plural, $number){
+function _ngettext($singular, $plural, $number) {
     $l10n = _get_reader();
 
     return _encode($l10n->ngettext($singular, $plural, $number));
@@ -348,7 +330,7 @@ function _ngettext($singular, $plural, $number){
  *
  * @return string
  */
-function _dgettext($domain, $msgid){
+function _dgettext($domain, $msgid) {
     $l10n = _get_reader($domain);
 
     return _encode($l10n->translate($msgid));
@@ -364,7 +346,7 @@ function _dgettext($domain, $msgid){
  *
  * @return string
  */
-function _dngettext($domain, $singular, $plural, $number){
+function _dngettext($domain, $singular, $plural, $number) {
     $l10n = _get_reader($domain);
 
     return _encode($l10n->ngettext($singular, $plural, $number));
@@ -379,7 +361,7 @@ function _dngettext($domain, $singular, $plural, $number){
  *
  * @return string
  */
-function _dcgettext($domain, $msgid, $category){
+function _dcgettext($domain, $msgid, $category) {
     $l10n = _get_reader($domain, $category);
 
     return _encode($l10n->translate($msgid));
@@ -396,7 +378,7 @@ function _dcgettext($domain, $msgid, $category){
  *
  * @return string
  */
-function _dcngettext($domain, $singular, $plural, $number, $category){
+function _dcngettext($domain, $singular, $plural, $number, $category) {
     $l10n = _get_reader($domain, $category);
 
     return _encode($l10n->ngettext($singular, $plural, $number));
@@ -410,7 +392,7 @@ function _dcngettext($domain, $singular, $plural, $number, $category){
  *
  * @return string
  */
-function _pgettext($context, $msgid){
+function _pgettext($context, $msgid) {
     $l10n = _get_reader();
 
     return _encode($l10n->pgettext($context, $msgid));
@@ -425,7 +407,7 @@ function _pgettext($context, $msgid){
  *
  * @return string
  */
-function _dpgettext($domain, $context, $msgid){
+function _dpgettext($domain, $context, $msgid) {
     $l10n = _get_reader($domain);
 
     return _encode($l10n->pgettext($context, $msgid));
@@ -441,7 +423,7 @@ function _dpgettext($domain, $context, $msgid){
  *
  * @return string
  */
-function _dcpgettext($domain, $context, $msgid, $category){
+function _dcpgettext($domain, $context, $msgid, $category) {
     $l10n = _get_reader($domain, $category);
 
     return _encode($l10n->pgettext($context, $msgid));
@@ -456,7 +438,7 @@ function _dcpgettext($domain, $context, $msgid, $category){
  *
  * @return string
  */
-function _npgettext($context, $singular, $plural){
+function _npgettext($context, $singular, $plural) {
     $l10n = _get_reader();
 
     return _encode($l10n->npgettext($context, $singular, $plural));
@@ -472,7 +454,7 @@ function _npgettext($context, $singular, $plural){
  *
  * @return string
  */
-function _dnpgettext($domain, $context, $singular, $plural){
+function _dnpgettext($domain, $context, $singular, $plural) {
     $l10n = _get_reader($domain);
 
     return _encode($l10n->npgettext($context, $singular, $plural));
@@ -489,7 +471,7 @@ function _dnpgettext($domain, $context, $singular, $plural){
  *
  * @return string
  */
-function _dcnpgettext($domain, $context, $singular, $plural, $category){
+function _dcnpgettext($domain, $context, $singular, $plural, $category) {
     $l10n = _get_reader($domain, $category);
 
     return _encode($l10n->npgettext($context, $singular, $plural));
@@ -502,7 +484,7 @@ function _dcnpgettext($domain, $context, $singular, $plural, $category){
  *
  * @return string
  */
-function __($msgid){
+function __($msgid) {
     return _gettext($msgid);
 }
 
@@ -515,7 +497,7 @@ function __($msgid){
  *
  * @return string
  */
-function __n($singular, $plural, $number){
+function __n($singular, $plural, $number) {
     return _ngettext($singular, $plural, $number);
 }
 
@@ -525,7 +507,7 @@ function __n($singular, $plural, $number){
  * @param $charset
  * @param $localePath
  */
-function init_translate_domain($domain, $locale, $charset, $localePath){
+function init_translate_domain($domain, $locale, $charset, $localePath) {
     _setlocale(LC_ALL, $locale);
     _bindtextdomain($domain, $localePath);
     _bind_textdomain_codeset($domain, $charset);
@@ -537,7 +519,7 @@ if(!function_exists('gettext')){
      * @param $domain
      * @param $path
      */
-    function bindtextdomain($domain, $path){
+    function bindtextdomain($domain, $path) {
         return _bindtextdomain($domain, $path);
     }
 
@@ -547,7 +529,7 @@ if(!function_exists('gettext')){
      *
      * @return mixed
      */
-    function bind_textdomain_codeset($domain, $codeSet){
+    function bind_textdomain_codeset($domain, $codeSet) {
         return _bind_textdomain_codeset($domain, $codeSet);
     }
 
@@ -556,7 +538,7 @@ if(!function_exists('gettext')){
      *
      * @return mixed
      */
-    function textdomain($domain){
+    function textdomain($domain) {
         return _textdomain($domain);
     }
 
@@ -565,7 +547,7 @@ if(!function_exists('gettext')){
      *
      * @return string
      */
-    function gettext($msgid){
+    function gettext($msgid) {
         return _gettext($msgid);
     }
 
@@ -574,7 +556,7 @@ if(!function_exists('gettext')){
      *
      * @return string
      */
-    function _($msgid){
+    function _($msgid) {
         return _gettext($msgid);
     }
 
@@ -585,7 +567,7 @@ if(!function_exists('gettext')){
      *
      * @return string
      */
-    function ngettext($singular, $plural, $number){
+    function ngettext($singular, $plural, $number) {
         return _ngettext($singular, $plural, $number);
     }
 
@@ -595,7 +577,7 @@ if(!function_exists('gettext')){
      *
      * @return string
      */
-    function dgettext($domain, $msgid){
+    function dgettext($domain, $msgid) {
         return _dgettext($domain, $msgid);
     }
 
@@ -607,7 +589,7 @@ if(!function_exists('gettext')){
      *
      * @return string
      */
-    function dngettext($domain, $singular, $plural, $number){
+    function dngettext($domain, $singular, $plural, $number) {
         return _dngettext($domain, $singular, $plural, $number);
     }
 
@@ -618,7 +600,7 @@ if(!function_exists('gettext')){
      *
      * @return string
      */
-    function dcgettext($domain, $msgid, $category){
+    function dcgettext($domain, $msgid, $category) {
         return _dcgettext($domain, $msgid, $category);
     }
 
@@ -631,7 +613,7 @@ if(!function_exists('gettext')){
      *
      * @return string
      */
-    function dcngettext($domain, $singular, $plural, $number, $category){
+    function dcngettext($domain, $singular, $plural, $number, $category) {
         return _dcngettext($domain, $singular, $plural, $number, $category);
     }
 
@@ -641,7 +623,7 @@ if(!function_exists('gettext')){
      *
      * @return string
      */
-    function pgettext($context, $msgid){
+    function pgettext($context, $msgid) {
         return _pgettext($context, $msgid);
     }
 
@@ -653,7 +635,7 @@ if(!function_exists('gettext')){
      *
      * @return string
      */
-    function npgettext($context, $singular, $plural, $number){
+    function npgettext($context, $singular, $plural, $number) {
         return _npgettext($context, $singular, $plural, $number);
     }
 
@@ -664,7 +646,7 @@ if(!function_exists('gettext')){
      *
      * @return string
      */
-    function dpgettext($domain, $context, $msgid){
+    function dpgettext($domain, $context, $msgid) {
         return _dpgettext($domain, $context, $msgid);
     }
 
@@ -677,7 +659,7 @@ if(!function_exists('gettext')){
      *
      * @return string
      */
-    function dnpgettext($domain, $context, $singular, $plural, $number){
+    function dnpgettext($domain, $context, $singular, $plural, $number) {
         return _dnpgettext($domain, $context, $singular, $plural, $number);
     }
 
@@ -689,7 +671,7 @@ if(!function_exists('gettext')){
      *
      * @return string
      */
-    function dcpgettext($domain, $context, $msgid, $category){
+    function dcpgettext($domain, $context, $msgid, $category) {
         return _dcpgettext($domain, $context, $msgid, $category);
     }
 
@@ -703,7 +685,7 @@ if(!function_exists('gettext')){
      *
      * @return string
      */
-    function dcnpgettext($domain, $context, $singular, $plural, $number, $category){
+    function dcnpgettext($domain, $context, $singular, $plural, $number, $category) {
         return _dcnpgettext($domain, $context, $singular, $plural, $number, $category);
     }
 }
