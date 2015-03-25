@@ -2,7 +2,7 @@ Gettext Component
 =======
 [![Build Status](https://scrutinizer-ci.com/g/RobinCK/gettext/badges/build.png?b=master)](https://scrutinizer-ci.com/g/RobinCK/gettext/build-status/master)
 [![Scrutinizer Code Quality](https://scrutinizer-ci.com/g/RobinCK/gettext/badges/quality-score.png?b=master)](https://scrutinizer-ci.com/g/RobinCK/gettext/?branch=master)
-[![Latest Stable Version](https://poser.pugx.org/kasseler/gettext/v/stable.svg)](https://packagist.org/packages/kasseler/config) 
+[![Latest Stable Version](https://poser.pugx.org/kasseler/gettext/v/stable.svg)](https://packagist.org/packages/kasseler/gettext) 
 [![Total Downloads](https://poser.pugx.org/kasseler/gettext/downloads.svg)](https://packagist.org/packages/kasseler/gettext) 
 [![Latest Unstable Version](https://poser.pugx.org/kasseler/gettext/v/unstable.svg)](https://packagist.org/packages/kasseler/gettext) 
 [![License](https://poser.pugx.org/kasseler/gettext/license.svg)](https://packagist.org/packages/kasseler/gettext)
